@@ -1,0 +1,33 @@
+@startuml
+title 3.3.2 Открытие двери/шлагбаума\n(автоматическое распознавание)
+
+participant "Домофон/Шлагбаум" as Device
+participant "Платформа\n«Умный дом»" as SmartPlatform
+participant "smart-home-интеграция" as SmartInt
+database "smart_audit_db" as AuditDB
+participant "tenant-core-app" as TenantCore
+participant "Mobile App" as Mobile
+database "data_dwh" as DWH
+
+== Распознавание на устройстве ==
+Device -> SmartPlatform: Событие распознавания\n(лицо / номер авто)
+
+== Проверка доступа платформой партнёра ==
+SmartPlatform -> SmartPlatform: Проверка списка доступа\n(списки от PropDevelopment)
+alt Доступ разрешён
+  SmartPlatform -> Device: Команда "открыть"
+  Device --> SmartPlatform: Результат открытия
+else Доступ запрещён
+  SmartPlatform -> Device: Отклонить запрос
+  Device --> SmartPlatform: Статус отказа
+end
+
+== Уведомление интеграционного сервиса ==
+SmartPlatform -> SmartInt: Webhook / событие\n(тип, объект, статус)
+
+SmartInt -> AuditDB: Запись события\n(распознавание, результат)
+
+== Аналитика ==
+SmartInt -> DWH: Отправка события\nдля аналитики (CDC)
+
+@enduml
