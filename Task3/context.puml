@@ -1,0 +1,35 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
+
+Person(owner, "Собственник", "Частный клиент, владеющий квартирой и использующий мобильное приложение PropDevelopment.")
+Person(tenant_manager, "Менеджер управляющей компании", "Следит за состоянием дома, управляет доступами и обращениями.")
+Person(security_officer, "Специалист по ИБ", "Отвечает за безопасность и контроль интеграций.")
+
+System_Boundary(prop, "Сервисы PropDevelopment для собственников") {
+System(tenant_app, "Мобильное приложение собственника", "Оплата ЖКУ, обращения, просмотр ремонтов, управление «Умным домом».")
+System(tenant_backend, "tenant-core-system", "Backend-сервисы PropDevelopment. \n Обрабатывает операции собственников, управляет правами доступа в дома и дворы, интегрируется с партнёрами.")
+
+
+System_Ext(utilities_partner, "Партнёрские системы ЖКУ", "Системы управляющих компаний, принимающие оплату ЖКУ и предоставляющие данные по дому.")
+System_Ext(finance, "AccountantSystem", "Система бухгалтерского учёта. \nФиксирует платежи и взаиморасчёты.")
+System_Ext(data_platform, "Платформа управления данными", "DWH / BI. \nАналитика по клиентам, сервисам и инцидентам безопасности.")
+
+System_Ext(smart_partner, "Платформа партнёра «Умный дом»", "Облачная платформа. Предоставляет интеллектуальный домофон и интеллектуальный шлагбаум.")
+System_Ext(int_doorphone, "Интеллектуальный домофон", "Устройства в подъездах. Распознаёт лица, управляет замком двери.")
+System_Ext(int_barrier, "Интеллектуальный шлагбаум", "Устройства на въезде во двор / паркинг. Распознаёт номера авто и управляет шлагбаумом.")
+
+Rel(owner, tenant_app, "Использует", "HTTPS / TLS, OAuth2/OIDC")
+Rel(tenant_app, tenant_backend, "Отправляет команды, получает данные", "HTTPS / TLS")
+
+Rel(tenant_backend, utilities_partner, "Отправляет данные для оплаты, получает статусы", "REST / SOAP / HTTPS")
+Rel(tenant_backend, finance, "Передаёт данные о платежах", "Асинхронные события / ETL")
+Rel(tenant_backend, data_platform, "Передаёт агрегированные данные и события", "Batch / Streaming")
+
+Rel(tenant_backend, smart_partner, "Управляет доступами и получает события", "REST/gRPC over HTTPS, mTLS, подписанные JWT")
+Rel(smart_partner, int_doorphone, "Управление и получение событий", "Протоколы партнёра")
+Rel(smart_partner, int_barrier, "Управление и получение событий", "Протоколы партнёра")
+
+Rel(tenant_manager, tenant_backend, "Управляет правами и объектами", "Внутренние интерфейсы, VPN")
+Rel(security_officer, tenant_backend, "Контролирует настройки интеграций и аудит", "Отчёты, журналы событий")
+
+@enduml
