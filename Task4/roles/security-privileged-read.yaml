@@ -1,0 +1,30 @@
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: security-privileged-read
+  labels:
+    app: propdevelopment
+    role: security-privileged-read
+rules:
+  # Полное чтение секретов и конфигов во всех namespaces
+  - apiGroups: [""]
+    resources: ["secrets", "configmaps"]
+    verbs: ["get", "list", "watch"]
+  # Чтение RBAC
+  - apiGroups: ["rbac.authorization.k8s.io"]
+    resources:
+      - roles
+      - rolebindings
+      - clusterroles
+      - clusterrolebindings
+    verbs: ["get", "list", "watch"]
+  # Чтение информации о кластере
+  - apiGroups: [""]
+    resources:
+      - namespaces
+      - nodes
+      - pods
+      - pods/log
+      - events
+    verbs: ["get", "list", "watch"]

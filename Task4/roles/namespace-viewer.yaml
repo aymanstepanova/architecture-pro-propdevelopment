@@ -1,0 +1,26 @@
+---
+# Роль только просмотра в конкретном неймспейсе (без доступа к Secret)
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: namespace-viewer
+  labels:
+    app: propdevelopment
+    role: namespace-viewer
+rules:
+  - apiGroups: ["", "apps", "batch", "extensions", "networking.k8s.io"]
+    resources:
+      - pods
+      - pods/log
+      - deployments
+      - statefulsets
+      - daemonsets
+      - jobs
+      - cronjobs
+      - services
+      - ingresses
+      - configmaps
+    verbs: ["get", "list", "watch"]
+  - apiGroups: [""]
+    resources: ["events"]
+    verbs: ["get", "list", "watch"]

@@ -1,0 +1,30 @@
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: cluster-readonly
+  labels:
+    app: propdevelopment
+    role: cluster-readonly
+rules:
+  - apiGroups: ["", "apps", "batch", "extensions", "networking.k8s.io"]
+    resources:
+      - pods
+      - pods/log
+      - deployments
+      - statefulsets
+      - daemonsets
+      - jobs
+      - cronjobs
+      - services
+      - ingresses
+      - configmaps
+    verbs: ["get", "list", "watch"]
+  - apiGroups: [""]
+    resources: ["events"]
+    verbs: ["get", "list", "watch"]
+
+  # Чтение секретов только в бизнес-неймспейсах, будем дополнительно ограничивать через binding
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs: ["get", "list", "watch"]
