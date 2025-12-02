@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-secure-non-root
+  namespace: audit-zone
+spec:
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 1002
+    runAsGroup: 1002
+    seccompProfile:
+      type: RuntimeDefault
+  containers:
+    - name: nginx
+      image: nginx:stable
+      securityContext:
+        allowPrivilegeEscalation: false
+        readOnlyRootFilesystem: true
+        capabilities:
+          drop:
+            - ALL
+      ports:
+        - containerPort: 80
