@@ -6,13 +6,11 @@ metadata:
 spec:
   securityContext:
     runAsNonRoot: true
-    runAsUser: 1002
-    runAsGroup: 1002
     seccompProfile:
       type: RuntimeDefault
   containers:
     - name: nginx
-      image: nginx:stable
+      image: nginxinc/nginx-unprivileged:stable-alpine
       securityContext:
         allowPrivilegeEscalation: false
         readOnlyRootFilesystem: true
@@ -20,4 +18,10 @@ spec:
           drop:
             - ALL
       ports:
-        - containerPort: 80
+        - containerPort: 8080
+      volumeMounts:
+        - name: nginx-tmp
+          mountPath: /tmp
+  volumes:
+    - name: nginx-tmp
+      emptyDir: {}

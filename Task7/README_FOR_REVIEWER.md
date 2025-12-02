@@ -1,5 +1,4 @@
 # Task 7 — Аудит и обеспечение соответствия политике безопасности контейнеров
-kubectl apply -f https://raw.githubusercontent.com/open-policy-agent/gatekeeper/release-3.16/deploy/gatekeeper.yaml
 
 ## 1. Что сделано
 
@@ -40,12 +39,21 @@ kubectl apply -f https://raw.githubusercontent.com/open-policy-agent/gatekeeper/
 1. Убедиться, что:
    - кластер Kubernetes запущен,
    - установлен OPA Gatekeeper (оператор или манифесты официальной установки).
+   - если не установлен - установить
+
+
+
 2. Перейти в каталог `Task7/`:
 
 ```bash
 cd Task7
+minikube start --extra-config=apiserver.audit-policy-file=/var/lib/minikube/audit-policy.yaml --extra-config=apiserver.audit-log-path=/var/lib/minikube/audit.log
+
+# копирование политики аудита в minikube
+minikube cp ./audit-policy.yaml /var/lib/minikube/audit-policy.yaml
+# установка gatekeeper
 kubectl apply -f https://raw.githubusercontent.com/open-policy-agent/gatekeeper/release-3.16/deploy/gatekeeper.yaml
-````
+```
 
 3. Сделать скрипты исполняемыми:
 

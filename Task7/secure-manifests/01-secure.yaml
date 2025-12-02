@@ -25,8 +25,12 @@ spec:
           mountPath: /var/cache/nginx
         - name: nginx-run
           mountPath: /var/run
+        - name: nginx-tmp
+          mountPath: /tmp
   volumes:
     - name: nginx-cache
       emptyDir: {}
     - name: nginx-run
+      emptyDir: {}
+    - name: nginx-tmp
       emptyDir: {}
