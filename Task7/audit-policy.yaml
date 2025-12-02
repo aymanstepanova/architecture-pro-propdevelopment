@@ -24,5 +24,5 @@ rules:
   # Для остальных — только metadata
   - level: Metadata
     resources:
-      - group: "*"
+      - group: ""
         resources: ["*"]
