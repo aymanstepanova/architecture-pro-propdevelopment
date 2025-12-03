@@ -36,23 +36,24 @@
 
 ## 2. Как воспроизвести проверку
 
-1. Убедиться, что:
-   - кластер Kubernetes запущен,
-   - установлен OPA Gatekeeper (оператор или манифесты официальной установки).
-   - если не установлен - установить
+1. Создание кластера и применение политик:
+   * создать файл audit-policy.yaml в директории ~\.minikube\files\etc\ssl\certs - audit-policy.yaml
+   * стартовать кластер, передав политику аудита в качестве параметра.
+   * установить gatekeeper в работающем кластере
 
+```bash
+minikube start --extra-config=apiserver.audit-policy-file=/etc/ssl/certs/audit-policy.yaml --extra-config=apiserver.audit-log-path=-
+# установка gatekeeper
+kubectl apply -f https://raw.githubusercontent.com/open-policy-agent/gatekeeper/release-3.16/deploy/gatekeeper.yaml
+```
 
 
 2. Перейти в каталог `Task7/`:
 
+
+Перейти в папку с заданием.
 ```bash
 cd Task7
-minikube start --extra-config=apiserver.audit-policy-file=/var/lib/minikube/audit-policy.yaml --extra-config=apiserver.audit-log-path=/var/lib/minikube/audit.log
-
-# копирование политики аудита в minikube
-minikube cp ./audit-policy.yaml /var/lib/minikube/audit-policy.yaml
-# установка gatekeeper
-kubectl apply -f https://raw.githubusercontent.com/open-policy-agent/gatekeeper/release-3.16/deploy/gatekeeper.yaml
 ```
 
 3. Сделать скрипты исполняемыми:
