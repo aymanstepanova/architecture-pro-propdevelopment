@@ -1,11 +1,21 @@
 apiVersion: audit.k8s.io/v1
 kind: Policy
 rules:
+  # Важные ресурсы в core group — логируем с RequestResponse
   - level: RequestResponse
     verbs: ["create", "delete", "update", "patch", "get", "list"]
     resources:
       - group: ""
-        resources: ["pods", "secrets", "configmaps", "serviceaccounts", "roles", "rolebindings"]
+        resources: ["pods", "secrets", "configmaps", "serviceaccounts"]
+
+  # RBAC — роли/биндинги, тоже подробно
+  - level: RequestResponse
+    verbs: ["create", "delete", "update", "patch", "get", "list"]
+    resources:
+      - group: "rbac.authorization.k8s.io"
+        resources: ["roles", "rolebindings", "clusterroles", "clusterrolebindings"]
+
+  # Всё остальное — хотя бы Metadata
   - level: Metadata
     resources:
       - group: ""
