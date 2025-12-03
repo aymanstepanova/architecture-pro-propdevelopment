@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-privileged
+  namespace: audit-zone
+spec:
+  containers:
+    - name: nginx
+      image: nginx:stable
+      securityContext:
+        privileged: true
+        runAsUser: 0
+        runAsGroup: 0
+      volumeMounts:
+        - name: nginx-data
+          mountPath: /var/log/nginx
+  volumes:
+    - name: nginx-data
+      emptyDir: {}

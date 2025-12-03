@@ -1,0 +1,38 @@
+@startuml
+title 3.3.1 Добавление / обновление прав доступа (лицо, авто)
+
+actor "Собственник" as Owner
+participant "Mobile App" as Mobile
+participant "tenant-core-app" as TenantCore
+database "tenant_db / CRM" as TenantDB
+participant "smart-home-integration-app" as SmartInt
+database "smart_audit_db" as AuditDB
+participant "Платформа\nУмный дом" as SmartPlatform
+
+== Ввод данных пользователем ==
+Owner -> Mobile: Добавление фото лица / номера авто\n+ подтверждение согласия
+Mobile -> TenantCore: POST /access-objects\n(био/номер авто, JWT)
+
+== Обработка в tenant-core-app ==
+TenantCore -> TenantDB: Проверка прав, договора,\nдома (SELECT)
+TenantDB --> TenantCore: OK / данные
+TenantCore -> TenantDB: Запись новых данных\nINSERT/UPDATE (био/авто)
+TenantCore -> SmartInt: Создать заявку на синхронизацию\n(внутренний REST)
+
+== Интеграция с партнёром ==
+SmartInt -> SmartPlatform: Создание/обновление\nбио/авто (REST API)
+SmartPlatform --> SmartInt: ID шаблона / авто\nили ошибка
+
+alt Успешная синхронизация
+  SmartInt -> TenantCore: Возврат ID шаблона/авто
+  TenantCore -> TenantDB: Сохранить ID шаблона/авто\nUPDATE
+  SmartInt -> AuditDB: Лог операции (успех)
+  TenantCore --> Mobile: 200 OK\n«Сервис подключён»
+else Ошибка интеграции
+  SmartInt -> AuditDB: Лог операции (ошибка,\nкод, описание)
+  SmartInt --> TenantCore: Ошибка интеграции
+  TenantCore -> TenantDB: Обновить статус\n"Ошибка интеграции"
+  TenantCore --> Mobile: 5xx/4xx\n"Не удалось подключить сервис,\nпопробуйте позже"
+end
+
+@enduml

@@ -1,0 +1,42 @@
+@startuml
+title 3.3.2 Открытие двери/шлагбаума\n(активное действие пользователя)
+
+actor "Собственник" as Owner
+participant "Mobile App" as Mobile
+participant "tenant-core-app" as TenantCore
+database "tenant_db" as TenantDB
+participant "smart-home-integration-app" as SmartInt
+database "smart_audit_db" as AuditDB
+participant "Платформа\n«Умный дом»" as SmartPlatform
+participant "Домофон/Шлагбаум" as Device
+database "data_dwh" as DWH
+
+== Команда из приложения ==
+Owner -> Mobile: Нажимает "Открыть подъезд / шлагбаум"
+Mobile -> TenantCore: POST /smart-home/open\n(тип: дверь/шлагбаум, JWT)
+
+== Проверка прав в tenant-core-app ==
+TenantCore -> TenantDB: Проверка прав, договора,\nобъекта (SELECT)
+TenantDB --> TenantCore: Результат проверки
+
+alt Права подтверждены
+  TenantCore -> SmartInt: Команда открыть\n(внутренний REST)
+
+  == Вызов партнёра ==
+  SmartInt -> SmartPlatform: Команда открыть\n(REST API)
+  SmartPlatform -> Device: Открыть дверь / шлагбаум
+  Device --> SmartPlatform: Результат операции
+  SmartPlatform --> SmartInt: Статус (успех/ошибка)
+
+  == Логирование и ответ ==
+  SmartInt -> AuditDB: Запись события\n(тип, объект, статус)
+  SmartInt --> TenantCore: Результат операции
+  TenantCore --> Mobile: Ответ пользователю\n(успешно/ошибка)
+
+  == Аналитика (опционально) ==
+  SmartInt -> DWH: Событие открытия\n(CDC)
+else Недостаточно прав / некорректный контекст
+  TenantCore --> Mobile: 403 Forbidden\n"Нет прав для управления"
+end
+
+@enduml

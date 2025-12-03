@@ -1,0 +1,78 @@
+---
+# 1. DevOps / платформа — настройка кластера (cluster-config-manager)
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: crb-devops-platform-config-manager
+  labels:
+    app: propdevelopment
+    binding: devops-platform
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-config-manager
+subjects:
+  - kind: ServiceAccount
+    name: sa-devops-platform
+    namespace: platform
+
+---
+# 2. Специалист по ИБ — привилегированный read всех секретов и RBAC
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: crb-security-privileged-read
+  labels:
+    app: propdevelopment
+    binding: security
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: security-privileged-read
+subjects:
+  - kind: ServiceAccount
+    name: sa-security
+    namespace: platform
+
+---
+# 3. Команда tenant-core — админы в своём неймспейсе
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: rb-tenant-admin
+  namespace: tenant-core
+  labels:
+    app: propdevelopment
+    binding: tenant-admin
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: namespace-admin
+subjects:
+  - kind: ServiceAccount
+    name: sa-tenant-admin
+    namespace: tenant-core
+
+---
+# 4. Операционная команда tenant-core — только просмотр в своём неймспейсе
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: rb-tenant-viewer
+  namespace: tenant-core
+  labels:
+    app: propdevelopment
+    binding: tenant-viewer
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: namespace-viewer
+subjects:
+  - kind: ServiceAccount
+    name: sa-tenant-viewer
+    namespace: tenant-core
+
